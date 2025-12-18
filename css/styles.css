@@ -565,6 +565,8 @@ button:focus {
   );
   color: #1b1302;
   box-shadow: 0 12px 26px rgba(212, 175, 55, 0.45);
+  display: block;
+  margin: 0 auto;
 }
 
 .btn-primary:hover {
