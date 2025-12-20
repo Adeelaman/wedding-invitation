@@ -71,13 +71,21 @@ function setupRevealOnScroll() {
   elements.forEach((el) => observer.observe(el));
 }
 
+// Helper: Create date in Pakistan Standard Time (PKT = UTC+5)
+function createDateInPKT(year, month, day, hour, minute = 0, second = 0) {
+  // Create date string in ISO format with PKT offset (UTC+5)
+  // Note: month is 0-indexed in JS Date, but we'll use 1-indexed for clarity
+  const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}T${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}:${String(second).padStart(2, "0")}+05:00`;
+  return new Date(dateStr);
+}
+
 // Countdown timer to first event (Barat)
 function setupCountdown() {
   const container = document.getElementById("countdown-timer");
   if (!container) return;
 
-  // January 1st, 2026, 18:00 local time
-  const eventDate = new Date("2026-01-01T18:00:00");
+  // January 1st, 2026, 18:00 PKT (Pakistan Standard Time, UTC+5)
+  const eventDate = createDateInPKT(2026, 1, 1, 18, 0, 0);
 
   function updateCountdown() {
     const now = new Date();
@@ -113,10 +121,12 @@ function setupCountdown() {
 }
 
 // Add-to-calendar (.ics) generation
+// ICS format requires UTC times, so we convert PKT (UTC+5) to UTC
 function createICSContent({ title, description, location, start, end }) {
   const pad = (n) => String(n).padStart(2, "0");
 
   function toICSDateString(date) {
+    // Convert to UTC for ICS format
     return (
       date.getUTCFullYear().toString() +
       pad(date.getUTCMonth() + 1) +
@@ -129,6 +139,8 @@ function createICSContent({ title, description, location, start, end }) {
     );
   }
 
+  // Ensure dates are treated as UTC for ICS generation
+  // start and end are already in PKT, so we convert to UTC
   const dtStart = toICSDateString(start);
   const dtEnd = toICSDateString(end);
   const dtStamp = toICSDateString(new Date());
@@ -181,21 +193,23 @@ function setupCalendarButtons() {
 
       switch (type) {
         case "barat": {
-          title = "Barat Ceremony - Mian Adeel Ur Rehman";
+          title = "Barat Ceremony - Dr. Mian Adeel Ur Rehman Burana";
           description =
-            "Barat Ceremony of Mian Adeel Ur Rehman with Daughter of Mirza Arshad Baig. IN SHA ALLAH.";
+            "Barat Ceremony of Dr. Mian Adeel Ur Rehman Burana with Daughter of Mirza Arshad Baig. IN SHA ALLAH.";
           location = "Marquesina, Garrison Country and Golf Club, Lahore Cantt";
-          start = new Date("2026-01-01T18:00:00");
-          end = new Date("2026-01-01T21:00:00");
+          // January 1st, 2026, 18:00 PKT (UTC+5) - 3 hour event
+          start = createDateInPKT(2026, 1, 1, 18, 0, 0);
+          end = createDateInPKT(2026, 1, 1, 21, 0, 0);
           break;
         }
         case "walima": {
-          title = "Walima Ceremony - Mian Adeel Ur Rehman";
+          title = "Walima Ceremony - Dr. Mian Adeel Ur Rehman Burana";
           description =
-            "Walima Ceremony of Mian Adeel Ur Rehman with Daughter of Mirza Arshad Baig. IN SHA ALLAH.";
+            "Walima Ceremony of Dr. Mian Adeel Ur Rehman Burana with Daughter of Mirza Arshad Baig. IN SHA ALLAH.";
           location = "Shafaq Lucky Marquee, Burewala Road, Vehari";
-          start = new Date("2026-01-03T18:00:00");
-          end = new Date("2026-01-03T21:00:00");
+          // January 3rd, 2026, 18:00 PKT (UTC+5) - Reception at 6pm, Dinner at 7pm
+          start = createDateInPKT(2026, 1, 3, 18, 0, 0);
+          end = createDateInPKT(2026, 1, 3, 21, 0, 0);
           break;
         }
         case "sisterBarat": {
@@ -203,8 +217,9 @@ function setupCalendarButtons() {
           description =
             "Barat Ceremony of beloved Daughter of Mian Aman Ullah Saleem with Taimoor Ahmed. IN SHA ALLAH.";
           location = "Shafaq Lucky Marquee, Burewala Road, Vehari";
-          start = new Date("2026-01-03T18:00:00");
-          end = new Date("2026-01-03T21:30:00");
+          // January 3rd, 2026, 18:00 PKT (UTC+5) - Reception at 6pm, Dinner at 7pm, Rukhsati at 8:30pm
+          start = createDateInPKT(2026, 1, 3, 18, 0, 0);
+          end = createDateInPKT(2026, 1, 3, 21, 30, 0);
           break;
         }
         default:
@@ -281,5 +296,18 @@ document.addEventListener("DOMContentLoaded", () => {
   setCurrentYear();
   setupKeyboardShortcuts();
 });
+document.addEventListener('click', function (e) {
+  const card = e.target.closest('.js-contact--call-toggle');
+  if (!card) return;
 
+  const href = card.getAttribute('data-href');
+  if (!href) return;
 
+  const a = document.createElement('a');
+  a.href = href;
+  a.style.display = 'none';
+
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+});
