@@ -337,10 +337,14 @@ button:focus {
 
 /* Navigation */
 .main-nav {
-  position: sticky;
+  position: fixed;
   top: 0;
   z-index: 10;
   margin-top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 960px;
 }
 
 .nav-inner {
